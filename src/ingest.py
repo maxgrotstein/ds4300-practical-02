@@ -107,6 +107,27 @@ def process_pdfs(data_dir):
                     )
             print(f" -----> Processed {file_name}")
 
+def process_pdfs_alt(data_dir, chunk_size, overlap, embed):
+
+    for file_name in os.listdir(data_dir):
+        if file_name.endswith(".pdf"):
+            pdf_path = os.path.join(data_dir, file_name)
+            text_by_page = extract_text_from_pdf(pdf_path)
+            for page_num, text in text_by_page:
+                chunks = split_text_into_chunks(text, chunk_size, overlap)
+                # print(f"  Chunks: {chunks}")
+                for chunk_index, chunk in enumerate(chunks):
+                    # embedding = calculate_embedding(chunk)
+                    embedding = get_embedding(chunk, embed)
+                    store_embedding(
+                        file=file_name,
+                        page=str(page_num),
+                        # chunk=str(chunk_index),
+                        chunk=str(chunk),
+                        embedding=embedding,
+                    )
+            print(f" -----> Processed {file_name}")
+
 
 def query_redis(query_text: str):
     q = (
@@ -124,6 +145,18 @@ def query_redis(query_text: str):
 
     for doc in res.docs:
         print(f"{doc.id} \n ----> {doc.vector_distance}\n")
+
+def test_preproc_vars(chunk_size, overlap, pre_proc, embed):
+    clear_redis_store()
+    create_hnsw_index()
+    # OpenWebUI
+    process_pdfs("../data/", chunk_size, overlap, pre_proc, embed)
+    print("\n---Done processing PDFs---\n")
+    query_redis("What is the capital of France?")
+
+
+
+
 
 
 def main():
