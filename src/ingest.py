@@ -154,26 +154,23 @@ def query_redis(query_text: str):
     for doc in res.docs:
         print(f"{doc.id} \n ----> {doc.vector_distance}\n")
 
-def test_preproc_vars(chunk_size, overlap, pre_proc, embed):
+def test_preproc_vars(chunk_size, overlap, embed):
     clear_redis_store()
     create_hnsw_index()
     # OpenWebUI
-    process_pdfs("../data/", chunk_size, overlap, pre_proc, embed)
+    process_pdfs_alt("../data/", chunk_size, overlap, embed)
     print("\n---Done processing PDFs---\n")
     query_redis("What is the capital of France?")
-
-
-
-
-
 
 def main():
-    clear_redis_store()
-    create_hnsw_index()
+    test_preproc_vars(500, 100, "nomic-embed-text")
+# def main():
+#     clear_redis_store()
+#     create_hnsw_index()
 
-    process_pdfs("../data/")
-    print("\n---Done processing PDFs---\n")
-    query_redis("What is the capital of France?")
+#     process_pdfs("../data/")
+#     print("\n---Done processing PDFs---\n")
+#     query_redis("What is the capital of France?")
 
 
 if __name__ == "__main__":
