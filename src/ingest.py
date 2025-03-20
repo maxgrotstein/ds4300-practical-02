@@ -162,6 +162,7 @@ def test_preproc_vars(chunk_size, overlap, embed):
     print("\n---Done processing PDFs---\n")
     query_redis("What is the capital of France?")
 
+
 def main():
     test_preproc_vars(500, 100, "nomic-embed-text")
 # def main():
