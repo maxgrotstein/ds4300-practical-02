@@ -6,6 +6,8 @@ import numpy as np
 from redis.commands.search.query import Query
 import os
 import fitz
+import re
+from nltk.corpus import stopwords
 
 # Initialize Redis connection
 redis_client = redis.Redis(host="localhost", port=6379, db=0)
@@ -73,6 +75,20 @@ def extract_text_from_pdf(pdf_path):
         text_by_page.append((page_num, page.get_text()))
     return text_by_page
 
+def preprocess_text(text):
+    """Optionally remove whitespace and stop words from text."""
+    # remove extra whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    # get set of English stop words
+    stop_words = set(stopwords.words('english'))
+    
+    # filter out stop words
+    tokens = text.split()
+    filtered_tokens = [token for token in tokens if token.lower() not in stop_words]
+    
+    return " ".join(filtered_tokens)
+
 
 # split the text into chunks with overlap
 def split_text_into_chunks(text, chunk_size=300, overlap=50):
@@ -110,7 +126,7 @@ def process_pdfs(data_dir):
                     )
             print(f" -----> Processed {file_name}")
 
-def process_pdfs_alt(data_dir, chunk_size, overlap, embed):
+def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess=0):
 
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".pdf"):
@@ -120,7 +136,8 @@ def process_pdfs_alt(data_dir, chunk_size, overlap, embed):
             text_by_page = extract_text_from_pdf(pdf_path)
 
             for page_num, text in text_by_page:
-
+                if preprocess!=0:
+                    text = preprocess_text(text)  
 
                 chunks = split_text_into_chunks(text, chunk_size, overlap)
                 # print(f"  Chunks: {chunks}")
@@ -154,17 +171,17 @@ def query_redis(query_text: str):
     for doc in res.docs:
         print(f"{doc.id} \n ----> {doc.vector_distance}\n")
 
-def test_preproc_vars(chunk_size, overlap, embed):
+def test_preproc_vars(chunk_size, overlap, embed, preprocess=0):
     clear_redis_store()
     create_hnsw_index()
     # OpenWebUI
-    process_pdfs_alt("../data/", chunk_size, overlap, embed)
+    process_pdfs_alt("../data/", chunk_size, overlap, embed, preprocess)
     print("\n---Done processing PDFs---\n")
     query_redis("What is the capital of France?")
 
 
 def main():
-    test_preproc_vars(500, 100, "nomic-embed-text")
+    test_preproc_vars(500, 100, "nomic-embed-text", 1)
 # def main():
 #     clear_redis_store()
 #     create_hnsw_index()
