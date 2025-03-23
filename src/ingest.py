@@ -186,7 +186,7 @@ def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='redis'):
 
 
 def main():
-    test_preproc_vars(500, 100, "nomic-embed-text", 1)
+    test_preproc_vars(500, 100, "nomic-embed-text")
 # def main():
 #     clear_redis_store()
 #     create_hnsw_index()

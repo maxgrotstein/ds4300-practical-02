@@ -68,7 +68,7 @@ def search_embeddings(query, top_k=3):
         # Print results for debugging
         for result in top_results:
             print(
-                f"---> File: {result['file']}, Page: {result['page']}, Chunk: {result['chunk']}"
+                #f"---> File: {result['file']}, Page: {result['page']}, Chunk: {result['chunk']}"
             )
 
         return top_results
@@ -94,7 +94,7 @@ def generate_rag_response(query, context_results, conversation_history):
         ]
     )
 
-    print(f"context_str: {context_str}")
+    # print(f"context_str: {context_str}")
 
     # Construct prompt with context
     prompt = f"""You are a helpful AI assistant. 
