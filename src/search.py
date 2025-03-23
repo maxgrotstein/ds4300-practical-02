@@ -6,6 +6,7 @@ import ollama
 from redis.commands.search.query import Query
 from redis.commands.search.field import VectorField, TextField
 
+# ollama pull mistral
 
 # Initialize models
 # embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -15,6 +16,8 @@ VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
+LLAMA_MODEL="llama3.2:latest"
+#LLAMA_MODEL="mistral:latest"
 
 # def cosine_similarity(vec1, vec2):
 #     """Calculate cosine similarity between two vectors."""
@@ -111,7 +114,7 @@ Answer:"""
 
     # Generate response using Ollama
     response = ollama.chat(
-        model="llama3.2:latest", messages=[{"role": "user", "content": prompt}]
+        model=LLAMA_MODEL, messages=[{"role": "user", "content": prompt}]
         # was using mistral:lastest
     )
 
@@ -122,8 +125,10 @@ def interactive_search():
     conversation_history=[]
 
     """Interactive search interface."""
+    print("Model:", LLAMA_MODEL)
     print("🔍 RAG Search Interface")
     print("Type 'exit' to quit")
+    
 
     while True:
         query = input("\nEnter your search query: ")
