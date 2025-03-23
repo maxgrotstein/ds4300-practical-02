@@ -75,7 +75,12 @@ def search_embeddings(query, top_k=3):
         return []
 
 
-def generate_rag_response(query, context_results):
+def generate_rag_response(query, context_results, conversation_history):
+
+    # get prior conversation context
+    conversation_context = "\n".join(
+        [f"User: {entry['user']}\nAssistant: {entry['assistant']}" for entry in conversation_history]
+    )
 
     # Prepare context string
     context_str = "\n".join(
@@ -90,11 +95,15 @@ def generate_rag_response(query, context_results):
 
     # Construct prompt with context
     prompt = f"""You are a helpful AI assistant. 
-    Use the following context to answer the query as accurately as possible. If the context is 
+    Use the following context and conversation history (if available) to answer the query as accurately as possible. If the context is 
     not relevant to the query, say 'I don't know'.
+
 
 Context:
 {context_str}
+
+Conversation History:
+{conversation_context}
 
 Query: {query}
 
@@ -110,6 +119,8 @@ Answer:"""
 
 
 def interactive_search():
+    conversation_history=[]
+
     """Interactive search interface."""
     print("🔍 RAG Search Interface")
     print("Type 'exit' to quit")
@@ -120,14 +131,25 @@ def interactive_search():
         if query.lower() == "exit":
             break
 
+        if query.lower() == "clear":
+            # reset the conversation history
+            conversation_history = []  
+            print("Conversation history cleared.")
+            continue
+    
+
         # Search for relevant embeddings
         context_results = search_embeddings(query)
 
         # Generate RAG response
-        response = generate_rag_response(query, context_results)
+        response = generate_rag_response(query, context_results, conversation_history)
 
         print("\n--- Response ---")
         print(response)
+
+        # add to conversation history
+        conversation_history.append({"user": query, "assistant": response})
+
 
 
 # def store_embedding(file, page, chunk, embedding):

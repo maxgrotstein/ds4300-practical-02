@@ -50,20 +50,24 @@ def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
 
 
 # store the embedding in Redis
-def store_embedding(file: str, page: str, chunk: str, embedding: list):
+def store_embedding(file: str, page: str, chunk: str, embedding: list, db: str):
     key = f"{DOC_PREFIX}:{file}_page_{page}_chunk_{chunk}"
-    redis_client.hset(
-        key,
-        mapping={
-            "file": file,
-            "page": page,
-            "chunk": chunk,
-            "embedding": np.array(
-                embedding, dtype=np.float32
-            ).tobytes(),  # Store as byte array
-        },
-    )
-    print(f"Stored embedding for: {chunk}")
+
+    if db=='redis':
+        redis_client.hset(
+            key,
+            mapping={
+                "file": file,
+                "page": page,
+                "chunk": chunk,
+                "embedding": np.array(
+                    embedding, dtype=np.float32
+                ).tobytes(),  # Store as byte array
+            },
+        )
+        print(f"Stored embedding for: {chunk}")
+    else:
+        print('This db is not configured.')
 
 
 # extract the text from a PDF by page
@@ -126,7 +130,7 @@ def process_pdfs(data_dir):
                     )
             print(f" -----> Processed {file_name}")
 
-def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess=0):
+def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
 
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".pdf"):
@@ -150,6 +154,7 @@ def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess=0):
                         # chunk=str(chunk_index),
                         chunk=str(chunk),
                         embedding=embedding,
+                        db=db,
                     )
             print(f" -----> Processed {file_name}")
 
@@ -171,11 +176,11 @@ def query_redis(query_text: str):
     for doc in res.docs:
         print(f"{doc.id} \n ----> {doc.vector_distance}\n")
 
-def test_preproc_vars(chunk_size, overlap, embed, preprocess=0):
+def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='redis'):
     clear_redis_store()
     create_hnsw_index()
     # OpenWebUI
-    process_pdfs_alt("../data/", chunk_size, overlap, embed, preprocess)
+    process_pdfs_alt("../data/", chunk_size, overlap, embed, preprocess, db)
     print("\n---Done processing PDFs---\n")
     query_redis("What is the capital of France?")
 
@@ -193,3 +198,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
