@@ -1,4 +1,4 @@
-## ingest.py
+## ingest_exp1.py
 
 import ollama
 import redis
@@ -37,6 +37,9 @@ def create_hnsw_index():
         FT.CREATE {INDEX_NAME} ON HASH PREFIX 1 {DOC_PREFIX}
         SCHEMA text TEXT
         embedding VECTOR HNSW 6 DIM {VECTOR_DIM} TYPE FLOAT32 DISTANCE_METRIC {DISTANCE_METRIC}
+        overlap NUMERIC SORTABLE
+        chunk_size NUMERIC SORTABLE
+        preproc NUMERIC SORTABLE
         """
     )
     print("Index created successfully.")
@@ -50,7 +53,7 @@ def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
 
 
 # store the embedding in Redis
-def store_embedding(file: str, page: str, chunk: str, embedding: list, db: str):
+def store_embedding(file: str, page: str, chunk: str, embedding: list, db: str, overlap=None, chunk_size=None, preproc=None):
     key = f"{DOC_PREFIX}:{file}_page_{page}_chunk_{chunk}"
 
     if db=='redis':
@@ -63,9 +66,13 @@ def store_embedding(file: str, page: str, chunk: str, embedding: list, db: str):
                 "embedding": np.array(
                     embedding, dtype=np.float32
                 ).tobytes(),  # Store as byte array
+                "overlap": overlap if overlap is not None else "",
+                "chunk_size": chunk_size if chunk_size is not None else "",
+                "preproc": preproc if preproc is not None else "",
             },
         )
-        print(f"Stored embedding for: {chunk}")
+       # print(f"Stored embedding for: {chunk}")
+       # print(f"Chunk with overlap={overlap}, chunk_size={chunk_size}, preproc={preproc}")
     else:
         print('This db is not configured.')
 
@@ -155,6 +162,9 @@ def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
                         chunk=str(chunk),
                         embedding=embedding,
                         db=db,
+                        overlap=overlap,
+                        chunk_size=chunk_size,
+                        preproc=preprocess
                     )
             print(f" -----> Processed {file_name}")
 

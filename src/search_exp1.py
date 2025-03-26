@@ -47,7 +47,7 @@ def search_embeddings(query, top_k=3):
         q = (
             Query("*=>[KNN 5 @embedding $vec AS vector_distance]")
             .sort_by("vector_distance")
-            .return_fields("id", "file", "page", "chunk", "vector_distance")
+            .return_fields("id", "file", "page", "chunk", "overlap", "chunk_size", "preproc", "vector_distance")
             .dialect(2)
         )
 
@@ -62,7 +62,10 @@ def search_embeddings(query, top_k=3):
                 "file": result.file,
                 "page": result.page,
                 "chunk": result.chunk,
-                "similarity": result.vector_distance,
+                "overlap": result.overlap,
+                "chunk_size": result.chunk_size,
+                "preproc": result.preproc,
+                "similarity": float(result.vector_distance),
             }
             for result in results.docs
         ][:top_k]
@@ -83,9 +86,9 @@ def search_embeddings(query, top_k=3):
 def generate_rag_response(query, context_results, conversation_history):
 
     # get prior conversation context
-    conversation_context = "\n".join(
-        [f"User: {entry['user']}\nAssistant: {entry['assistant']}" for entry in conversation_history]
-    )
+    #conversation_context = "\n".join(
+    #    [f"User: {entry['user']}\nAssistant: {entry['assistant']}" for entry in conversation_history]
+    #)
 
     # Prepare context string
     context_str = "\n".join(
@@ -100,15 +103,12 @@ def generate_rag_response(query, context_results, conversation_history):
 
     # Construct prompt with context
     prompt = f"""You are a helpful AI assistant. 
-    Use the following context and conversation history (if available) to answer the query as accurately as possible. If the context is 
-    not relevant to the query, say 'I don't know'.
+    Use the following context to answer the query as accurately as possible. If the context is 
+    not relevant to the query, say 'I don't know'. The character '~' must NOT be used anywhere in your response.
 
 
 Context:
 {context_str}
-
-Conversation History:
-{conversation_context}
 
 Query: {query}
 
