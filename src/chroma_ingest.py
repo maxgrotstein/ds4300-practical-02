@@ -1,4 +1,4 @@
-# Port is 6385
+# Port is 8000
 
 ## DS 4300 Example - from docs
 
@@ -158,43 +158,32 @@ def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
                     )
             print(f" -----> Processed {file_name}")
 
-
 def query_chroma(query_text: str):
-    q = (
-        Query("*=>[KNN 5 @embedding $vec AS vector_distance]")
-        .sort_by("vector_distance")
-        .return_fields("id", "vector_distance")
-        .dialect(2)
-    )
     query_text = "Efficient search in vector databases"
     embedding = get_embedding(query_text)
-    res = chroma_client.ft(INDEX_NAME).search(
-        q, query_params={"vec": np.array(embedding, dtype=np.float32).tobytes()}
+    chroma_collection = chroma_client.get_collection(name="Notes")
+    res = chroma_collection.query(
+        query_embeddings=embedding,
+        n_results=3,
+        include=["metadatas", "distances"]
     )
-    # print(res.docs)
+    # print(res)
 
-    for doc in res.docs:
-        print(f"{doc.id} \n ----> {doc.vector_distance}\n")
+    for i in range(len(res.get("ids")[0])):
+        print(f"{res.get("ids")[0][i]} \n ----> {res.get("distances")[0][i]}\n")
 
 def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='chroma'):
-    clear_chroma()
-    print("Cleared chroma")
-    create_hnsw_index()
-    print("Created Index")
-    process_pdfs_alt("data", chunk_size, overlap, embed, preprocess, db)
-    print("\n---Done processing PDFs---\n")
-    # query_chroma("What is the capital of France?")
+    # clear_chroma()
+    # print("Cleared chroma")
+    # create_hnsw_index()
+    # print("Created Index")
+    # process_pdfs_alt("data", chunk_size, overlap, embed, preprocess, db)
+    # print("\n---Done processing PDFs---\n")
+    query_chroma("What is the capital of France?")
 
 
 def main():
     test_preproc_vars(500, 100, "nomic-embed-text")
-# def main():
-#     clear_chroma_store()
-#     create_hnsw_index()
-
-#     process_pdfs("../data/")
-#     print("\n---Done processing PDFs---\n")
-#     query_chroma("What is the capital of France?")
 
 
 if __name__ == "__main__":
