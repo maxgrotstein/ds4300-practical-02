@@ -158,6 +158,7 @@ def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
                     )
             print(f" -----> Processed {file_name}")
 
+
 def query_chroma(query_text: str):
     query_text = "Efficient search in vector databases"
     embedding = get_embedding(query_text)
@@ -167,18 +168,18 @@ def query_chroma(query_text: str):
         n_results=3,
         include=["metadatas", "distances"]
     )
-    # print(res)
 
     for i in range(len(res.get("ids")[0])):
         print(f"{res.get("ids")[0][i]} \n ----> {res.get("distances")[0][i]}\n")
 
+
 def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='chroma'):
-    # clear_chroma()
-    # print("Cleared chroma")
-    # create_hnsw_index()
-    # print("Created Index")
-    # process_pdfs_alt("data", chunk_size, overlap, embed, preprocess, db)
-    # print("\n---Done processing PDFs---\n")
+    clear_chroma()
+    print("Cleared chroma")
+    create_hnsw_index()
+    print("Created Index")
+    process_pdfs_alt("data", chunk_size, overlap, embed, preprocess, db)
+    print("\n---Done processing PDFs---\n")
     query_chroma("What is the capital of France?")
 
 
