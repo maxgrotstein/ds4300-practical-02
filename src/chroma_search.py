@@ -43,17 +43,6 @@ def search_embeddings(query, top_k=3):
     chroma_collection = chroma_client.get_collection(name="Notes")
 
     try:
-        # Construct the vector similarity search query
-        # Use a more standard RediSearch vector search syntax
-        # q = Query("*").sort_by("embedding", query_vector)
-
-        # q = (
-        #     Query("*=>[KNN 5 @embedding $vec AS vector_distance]")
-        #     .sort_by("vector_distance")
-        #     .return_fields("id", "file", "page", "chunk", "vector_distance")
-        #     .dialect(2)
-        # )
-
         # Perform the search
         res = chroma_collection.query(
             query_embeddings=query_vector,
