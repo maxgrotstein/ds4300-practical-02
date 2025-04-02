@@ -4,17 +4,19 @@
 This project implements a Retrieval Augmented Generation (RAG) pipeline with the primary focus being on creating a model based off class notes to serve as a sort of study guide / cheat sheet. It has built in custom vector stores and LLMs as well as experimentation tools in order to evaluate different configurations (e.g. chunk size, embedding model, chunk overlap, etc.) for analysis of optimal performance and use cases.
 
 ## Project Structure
+<pre>
 ds4300-practical-02/  
 ├── data/                    # Input .pdf here for use in the RAG  
 ├── src/                     # Core RAG logic (ingestion and searching)  
 │   ├── ingest.py  
 │   └── search.py  
-├── experiments/            # Scripts to run tests with different configs  
+├── experiments/             # Scripts to run tests with different configs  
 │   └── test_runner.py  
-├── results/                # Output of test runs + evaluation scores  
+├── results/                 # Output of test runs + evaluation scores  
 ├── requirements.txt  
 ├── docker-compose.yaml  
 └── README.md  
+</pre>
 
 ## Quickstart Guide
 ### 1. Install Dependencies
