@@ -1,0 +1,8 @@
+chromadb==0.6.3
+PyMuPDF==1.25.3
+nltk==3.9.1
+numpy==2.2.4
+ollama==0.4.7
+psutil==6.1.1
+redis==5.2.1
+weaviate_client==4.11.3
