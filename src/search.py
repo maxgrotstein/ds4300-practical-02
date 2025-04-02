@@ -14,7 +14,9 @@ from redis.commands.search.field import VectorField, TextField
 # embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
-VECTOR_DIM = 768
+#VECTOR_DIM = 768
+# after experiment
+VECTOR_DIM = 1024
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
@@ -25,9 +27,11 @@ LLAMA_MODEL="llama3.2:latest"
 #     """Calculate cosine similarity between two vectors."""
 #     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
+# ORIGINAL
+# def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
 
-def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
-
+# after experiment
+def get_embedding(text: str, model: str = "mxbai-embed-large") -> list:
     response = ollama.embeddings(model=model, prompt=text)
     return response["embedding"]
 

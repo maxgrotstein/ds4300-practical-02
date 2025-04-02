@@ -169,8 +169,8 @@ def query_chroma(query_text: str):
         include=["metadatas", "distances"]
     )
 
-    for i in range(len(res.get("ids")[0])):
-        print(f"{res.get("ids")[0][i]} \n ----> {res.get("distances")[0][i]}\n")
+    #for i in range(len(res.get("ids")[0])):
+        #print(f"{res.get("ids")[0][i]} \n ----> {res.get("distances")[0][i]}\n")
 
 
 def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='chroma'):
@@ -178,7 +178,7 @@ def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='chroma'):
     print("Cleared chroma")
     create_hnsw_index()
     print("Created Index")
-    process_pdfs_alt("data", chunk_size, overlap, embed, preprocess, db)
+    process_pdfs_alt("../data/", chunk_size, overlap, embed, preprocess, db)
     print("\n---Done processing PDFs---\n")
     query_chroma("What is the capital of France?")
 

@@ -12,7 +12,11 @@ from nltk.corpus import stopwords
 # Initialize Redis connection
 redis_client = redis.Redis(host="localhost", port=6379, db=0)
 
-VECTOR_DIM = 768
+# ORIGINAL
+# VECTOR_DIM = 768
+
+# after experiment
+VECTOR_DIM = 1024
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
@@ -42,9 +46,11 @@ def create_hnsw_index():
     print("Index created successfully.")
 
 
-# Generate an embedding using nomic-embed-text - makes 768 dim vector
-def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
+# Generate an embedding using nomic-embed-text - makes 768 dim vector ORIGINAL
+#def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
 
+#after experiment
+def get_embedding(text: str, model: str = "mxbai-embed-large") -> list:
     response = ollama.embeddings(model=model, prompt=text)
     return response["embedding"]
 
@@ -185,8 +191,13 @@ def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='redis'):
     query_redis("What is the capital of France?")
 
 
-def main():
-    test_preproc_vars(500, 100, "nomic-embed-text")
+def main(): 
+    # original
+    #test_preproc_vars(500, 100, "nomic-embed-text")
+
+    # reccomendations from experiment 1 & 2
+    test_preproc_vars(1000, 100, "mxbai-embed-large", 1)
+
 # def main():
 #     clear_redis_store()
 #     create_hnsw_index()

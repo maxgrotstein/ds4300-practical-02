@@ -20,15 +20,15 @@ ollama_models = ["llama3.2:latest", "mistral:latest"]
 
 # questions
 questions = [
-    "What is Redis?",
-    #"Describe ACID compliance.",
-    #"Describe a B+ Tree.",
-    #"What are the tradeoffs between B+ Tree and AVL trees?",
-    #"Write a MongoDB aggregation pipeline to find the top 5 customers with the highest total spend. Assume the orders collection contains documents with fields: customerId, items (an array of objects with price and quantity), and status. Only include orders where status is 'completed'. Return the customerId and their total spend, sorted from highest to lowest.",
-    "What are the inherent CAP theorem tradeoffs associated with different types of database systems, such as relational databases (RDBMS), document stores (e.g., MongoDB), vector databases (e.g., Redis with vector support), and graph databases (e.g., Neo4j)?"
+    "1) What is Redis?",
+    "1) Describe ACID compliance.",
+    "1) Describe a B+ Tree.",
+    "2) What are the tradeoffs between B+ Tree and AVL trees?",
+    "2) Write a MongoDB aggregation pipeline to find the top 5 customers with the highest total spend. Assume the orders collection contains documents with fields: customerId, items (an array of objects with price and quantity), and status. Only include orders where status is 'completed'. Return the customerId and their total spend, sorted from highest to lowest.",
+    "2) What are the inherent CAP theorem tradeoffs associated with different types of database systems, such as relational databases (RDBMS), document stores (e.g., MongoDB), vector databases (e.g., Redis with vector support), and graph databases (e.g., Neo4j)?"
 ]
 
-output_csv = os.path.join("results", "experiment02_results.csv")
+output_csv = os.path.join("results", "experiment2_results.csv")
 
 with open(output_csv, mode="w", newline="", encoding="utf-8") as csvfile:
     fieldnames = [
