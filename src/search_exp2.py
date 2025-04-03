@@ -28,7 +28,7 @@ def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
     return response["embedding"]
 
 
-def search_embeddings(query, embedding_model, top_k=3):
+def search_embeddings(query, embedding_model="nomic-embed-text", top_k=3):
 
     query_embedding = get_embedding(query, model=embedding_model)
 
@@ -77,6 +77,11 @@ def search_embeddings(query, embedding_model, top_k=3):
     except Exception as e:
         print(f"Search error: {e}")
         return []
+
+
+def search_and_generate(query, embedding_model, llm_model):
+    context_results = search_embeddings(query, top_k=5)
+    return generate_rag_response(query, context_results, "llama3.2:latest")
 
 
 def generate_rag_response(query, context_results, llm_model):

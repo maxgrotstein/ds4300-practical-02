@@ -1,84 +1,46 @@
-# Need to run this in terminal to get container to spin up properly
-# docker run -d \
-#   --name weaviate \
-#   -p 8080:8080 \
-#   -p 50051:50051
-#   -e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=true \
-#   -e QUERY_DEFAULTS_LIMIT=25 \
-#   semitechnologies/weaviate:latest
-
-# Port is 8080
+# Port is 8000
 
 ## DS 4300 Example - from docs
 
 import ollama
-import weaviate
-from weaviate import WeaviateClient
-from weaviate.classes.query import Filter
-import weaviate.classes.config as wvcc
-from weaviate.classes.query import MetadataQuery
-from weaviate.classes.config import Configure, VectorDistances
+import chromadb
+from chromadb.config import Settings
 import numpy as np
 import os
 import fitz
 import re
 from nltk.corpus import stopwords
 
-CLASS_NAME = "Document"
+# Initialize chroma connection
+chroma_client = chromadb.HttpClient(
+    host="localhost",
+    port=8000
+    )
 
 VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 
-# used to clear the chroma vector store
-def clear_weaviate():
-    print("Clearing existing Weaviate store...")
-    weaviate_client = weaviate.connect_to_local()
 
-    try:
-        if weaviate_client.collections.exists(CLASS_NAME):
-            weaviate_client.collections.delete(CLASS_NAME)
-            weaviate_client.close()
-            print("Weaviate store cleared.")
-    except:
-        weaviate_client.close()
-        return
-    
-    
-# Create an HNSW index in Weaviate
+# used to clear the chroma vector store
+def clear_chroma():
+    print("Clearing existing Chroma store...")
+    for col_name in chroma_client.list_collections():
+        chroma_client.delete_collection(name=col_name)
+    print("Chroma store cleared.")
+
+
+# Create an HNSW index in chroma
 def create_hnsw_index():
-    clear_weaviate()
     try:
-        weaviate_client = weaviate.connect_to_local()
-        collection = weaviate_client.collections.create(
-            name=CLASS_NAME,
-            vector_index_config=Configure.VectorIndex.hnsw(
-                distance_metric=VectorDistances.COSINE
-            ),
-            properties=[
-                wvcc.Property(
-                    name="file",
-                    data_type=wvcc.DataType.TEXT
-                ),
-                wvcc.Property(
-                    name="page",
-                    data_type=wvcc.DataType.TEXT
-                ),
-                wvcc.Property(
-                    name="chunk",
-                    data_type=wvcc.DataType.TEXT
-                )
-            ]
-        )
-        weaviate_client.close()
+        for col in chroma_client.list_collections():
+            chroma_client.delete_collection(name=col.name)
     except:
-        weaviate_client.close()
         pass
-    finally:
-        weaviate_client.close()
-        print("Collection created successfully.")
-    
+    chroma_client.create_collection(name="Notes")
+    print("Collection created successfully.")
+
 
 # Generate an embedding using nomic-embed-text - makes 768 dim vector
 def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
@@ -87,21 +49,24 @@ def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
     return response["embedding"]
 
 
-# store the embedding in Weaviate
+# store the embedding in Chroma
 def store_embedding(file: str, page: str, chunk: str, embedding: list, db: str):
-    weaviate_client = weaviate.connect_to_local()
-    docs = weaviate_client.collections.get(CLASS_NAME)
+    collection = chroma_client.get_collection(name="Notes")
+
     key = f"{DOC_PREFIX}:{file}_page_{page}_chunk_{chunk}"
 
-    new_uuid = docs.data.insert(
-        properties={
+    collection.add(
+        ids=key,
+        embeddings=np.array(embedding, dtype=np.float32),
+        # embedding=np.array(
+        #     embedding, dtype=np.float32
+        # ).tobytes()
+        metadatas=[{
             "file": file,
-            "page": page,
-            "chunk": chunk
-        },
-        vector=embedding
+            "chunk": chunk,
+            "page": page
+        }],
     )
-    weaviate_client.close()
     print(f"Stored embedding for: {chunk}")
 
 
@@ -113,7 +78,6 @@ def extract_text_from_pdf(pdf_path):
     for page_num, page in enumerate(doc):
         text_by_page.append((page_num, page.get_text()))
     return text_by_page
-
 
 def preprocess_text(text):
     """Optionally remove whitespace and stop words from text."""
@@ -166,7 +130,6 @@ def process_pdfs(data_dir):
                     )
             print(f" -----> Processed {file_name}")
 
-
 def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
 
     for file_name in os.listdir(data_dir):
@@ -196,30 +159,28 @@ def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
             print(f" -----> Processed {file_name}")
 
 
-def query_weaviate(query_text: str):
-    weaviate_client = weaviate.connect_to_local()
+def query_chroma(query_text: str):
     query_text = "Efficient search in vector databases"
-    collection = weaviate_client.collections.get(CLASS_NAME)
-    response = collection.query.bm25(
-        query=query_text,
-        limit=3,
-        offset=1,
-        return_metadata=MetadataQuery(score=True),
+    embedding = get_embedding(query_text)
+    chroma_collection = chroma_client.get_collection(name="Notes")
+    res = chroma_collection.query(
+        query_embeddings=embedding,
+        n_results=3,
+        include=["metadatas", "distances"]
     )
-    weaviate_client.close()
 
-    for o in response.objects:
-        print(f"{o.properties} \n ----> {o.metadata.score}\n")
+    #for i in range(len(res.get("ids")[0])):
+        #print(f"{res.get("ids")[0][i]} \n ----> {res.get("distances")[0][i]}\n")
 
 
 def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='chroma'):
-    clear_weaviate()
-    print("Cleared Weaviate")
+    clear_chroma()
+    print("Cleared chroma")
     create_hnsw_index()
     print("Created Index")
     process_pdfs_alt("../data/", chunk_size, overlap, embed, preprocess, db)
     print("\n---Done processing PDFs---\n")
-    query_weaviate("What is the capital of France?")
+    query_chroma("What is the capital of France?")
 
 
 def main():
