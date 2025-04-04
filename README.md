@@ -1,7 +1,7 @@
 # ds4300-practical-02
 
 ## Project Overview
-This project implements a Retrieval Augmented Generation (RAG) pipeline with the primary focus being on creating a model based off class notes to serve as a sort of study guide / cheat sheet. It has built in custom vector stores and LLMs as well as experimentation tools in order to evaluate different configurations (e.g. chunk size, embedding model, chunk overlap, etc.) for analysis of optimal performance and use cases.
+This project implements a Retrieval Augmented Generation (RAG) pipeline with the primary focus being on creating a model based off class notes to serve as a sort of study guide / cheat sheet. From a functionality perspective, it utilizes different vector databases, embedding models, and LLMs for its functionality. From this, we developed an experimental methodology and tools to evaluate different configurations (e.g. chunk size, embedding model, chunk overlap, etc.) for analysis of optimal performance and use cases.
 
 ## Project Structure
 <pre>
