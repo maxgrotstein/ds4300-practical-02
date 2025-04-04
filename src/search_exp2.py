@@ -3,7 +3,6 @@
 import redis
 import json
 import numpy as np
-# from sentence_transformers import SentenceTransformer
 import ollama
 from redis.commands.search.query import Query
 from redis.commands.search.field import VectorField, TextField
@@ -18,9 +17,6 @@ INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 
-# def cosine_similarity(vec1, vec2):
-#     """Calculate cosine similarity between two vectors."""
-#     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
 
 def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
@@ -115,7 +111,7 @@ Answer:"""
     # Generate response using Ollama
     response = ollama.chat(
         model=llm_model, messages=[{"role": "user", "content": prompt}]
-        # was using mistral:lastest
+    
     )
 
     return response["message"]["content"]

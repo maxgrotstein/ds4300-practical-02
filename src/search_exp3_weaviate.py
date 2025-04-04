@@ -3,31 +3,22 @@ from weaviate import WeaviateClient
 from weaviate.classes.query import MetadataQuery
 import json
 import numpy as np
-# from sentence_transformers import SentenceTransformer
+
 import ollama
 from redis.commands.search.field import VectorField, TextField
 
-# ollama pull mistral
-
 # Initialize models
-# embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 VECTOR_DIM = 768
 INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 LLAMA_MODEL="llama3.2:latest"
-#LLAMA_MODEL="mistral:latest"
-
-# def cosine_similarity(vec1, vec2):
-#     """Calculate cosine similarity between two vectors."""
-#     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
 
 def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
 
     response = ollama.embeddings(model=model, prompt=text)
     return response["embedding"]
-
 
 def search_embeddings(query, top_k=3):
     weaviate_client = weaviate.connect_to_local()
@@ -64,11 +55,7 @@ def search_and_generate(query, embedding_model, llm_model):
 
 def generate_rag_response(query, context_results, conversation_history):
 
-    # get prior conversation context
-    conversation_context = "\n".join(
-        [f"User: {entry['user']}\nAssistant: {entry['assistant']}" for entry in conversation_history]
-    )
-
+   
     # Prepare context string
     context_str = "\n".join(
         [
@@ -82,15 +69,13 @@ def generate_rag_response(query, context_results, conversation_history):
 
     # Construct prompt with context
     prompt = f"""You are a helpful AI assistant. 
-    Use the following context and conversation history (if available) to answer the query as accurately as possible. If the context is 
+    Use the following context to answer the query as accurately as possible. If the context is 
     not relevant to the query, say 'I don't know'.
 
 
 Context:
 {context_str}
 
-Conversation History:
-{conversation_context}
 
 Query: {query}
 

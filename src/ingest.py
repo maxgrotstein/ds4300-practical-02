@@ -196,15 +196,7 @@ def main():
     #test_preproc_vars(500, 100, "nomic-embed-text")
 
     # reccomendations from experiment 1 & 2
-    test_preproc_vars(1000, 100, "mxbai-embed-large", 1)
-
-# def main():
-#     clear_redis_store()
-#     create_hnsw_index()
-
-#     process_pdfs("../data/")
-#     print("\n---Done processing PDFs---\n")
-#     query_redis("What is the capital of France?")
+    test_preproc_vars(1000, 100, "nomic-embed-text", 1)
 
 
 if __name__ == "__main__":

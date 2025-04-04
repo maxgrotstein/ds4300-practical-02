@@ -3,7 +3,6 @@
 import redis
 import json
 import numpy as np
-# from sentence_transformers import SentenceTransformer
 import ollama
 from redis.commands.search.query import Query
 from redis.commands.search.field import VectorField, TextField
@@ -11,7 +10,6 @@ from redis.commands.search.field import VectorField, TextField
 # ollama pull mistral
 
 # Initialize models
-# embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 redis_client = redis.StrictRedis(host="localhost", port=6379, decode_responses=True)
 
 VECTOR_DIM = 768
@@ -19,11 +17,7 @@ INDEX_NAME = "embedding_index"
 DOC_PREFIX = "doc:"
 DISTANCE_METRIC = "COSINE"
 LLAMA_MODEL="llama3.2:latest"
-#LLAMA_MODEL="mistral:latest"
 
-# def cosine_similarity(vec1, vec2):
-#     """Calculate cosine similarity between two vectors."""
-#     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
 
 def get_embedding(text: str, model: str = "nomic-embed-text") -> list:

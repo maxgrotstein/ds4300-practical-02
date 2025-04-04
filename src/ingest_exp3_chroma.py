@@ -58,9 +58,6 @@ def store_embedding(file: str, page: str, chunk: str, embedding: list, db: str):
     collection.add(
         ids=key,
         embeddings=np.array(embedding, dtype=np.float32),
-        # embedding=np.array(
-        #     embedding, dtype=np.float32
-        # ).tobytes()
         metadatas=[{
             "file": file,
             "chunk": chunk,
@@ -105,38 +102,12 @@ def split_text_into_chunks(text, chunk_size=300, overlap=50):
     return chunks
 
 
-# two pdf readers (fitz, pdf plumber), whitespace on or off (preproc?), three overlap sizes, three chunk sizes, three embedding models (nomic, Instructor XL, 1 more)
-# prompt tweaks, three DBs (Redis, Chroma, 1 more), LLMs (current: llama3.2:latest, could also use Mistral)
- 
-# Process all PDF files in a given directory
-def process_pdfs(data_dir):
-
-    for file_name in os.listdir(data_dir):
-        if file_name.endswith(".pdf"):
-            pdf_path = os.path.join(data_dir, file_name)
-            text_by_page = extract_text_from_pdf(pdf_path)
-            for page_num, text in text_by_page:
-                chunks = split_text_into_chunks(text)
-                # print(f"  Chunks: {chunks}")
-                for chunk_index, chunk in enumerate(chunks):
-                    # embedding = calculate_embedding(chunk)
-                    embedding = get_embedding(chunk)
-                    store_embedding(
-                        file=file_name,
-                        page=str(page_num),
-                        # chunk=str(chunk_index),
-                        chunk=str(chunk),
-                        embedding=embedding,
-                    )
-            print(f" -----> Processed {file_name}")
-
 def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
 
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".pdf"):
             pdf_path = os.path.join(data_dir, file_name)
 
-            # pass pdf reader here, as well as flag to preprocess or not
             text_by_page = extract_text_from_pdf(pdf_path)
 
             for page_num, text in text_by_page:
@@ -144,7 +115,7 @@ def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
                     text = preprocess_text(text)  
 
                 chunks = split_text_into_chunks(text, chunk_size, overlap)
-                # print(f"  Chunks: {chunks}")
+    
                 for chunk_index, chunk in enumerate(chunks):
                     # embedding = calculate_embedding(chunk)
                     embedding = get_embedding(chunk, embed)
@@ -168,9 +139,6 @@ def query_chroma(query_text: str):
         n_results=3,
         include=["metadatas", "distances"]
     )
-
-    #for i in range(len(res.get("ids")[0])):
-        #print(f"{res.get("ids")[0][i]} \n ----> {res.get("distances")[0][i]}\n")
 
 
 def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='chroma'):

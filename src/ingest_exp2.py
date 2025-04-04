@@ -54,7 +54,7 @@ def create_hnsw_index(embedding_model: str):
     print("Index created successfully.")
 
 
-# Generate an embedding using nomic-embed-text - makes 768 dim vector
+# Generate an embedding using passed model
 def get_embedding(text: str, model: str = "nomic-embed-text") -> list:
 
     response = ollama.embeddings(model=model, prompt=text)
@@ -80,8 +80,6 @@ def store_embedding(file: str, page: str, chunk: str, embedding: list, db: str, 
                 "preproc": preproc if preproc is not None else "",
             },
         )
-       # print(f"Stored embedding for: {chunk}")
-       # print(f"Chunk with overlap={overlap}, chunk_size={chunk_size}, preproc={preproc}")
     else:
         print('This db is not configured.')
 
@@ -96,7 +94,7 @@ def extract_text_from_pdf(pdf_path):
     return text_by_page
 
 def preprocess_text(text):
-    """Optionally remove whitespace and stop words from text."""
+    """Optionally remove whitespace and stop words from text"""
     # remove extra whitespace
     text = re.sub(r'\s+', ' ', text).strip()
     
@@ -121,39 +119,12 @@ def split_text_into_chunks(text, chunk_size=300, overlap=50):
     return chunks
 
 
-# two pdf readers (fitz, pdf plumber), whitespace on or off (preproc?), three overlap sizes, three chunk sizes, three embedding models (nomic, Instructor XL, 1 more)
-# prompt tweaks, three DBs (Redis, Chroma, 1 more), LLMs (current: llama3.2:latest, could also use Mistral)
- 
-# Process all PDF files in a given directory
-def process_pdfs(data_dir):
-
-    for file_name in os.listdir(data_dir):
-        if file_name.endswith(".pdf"):
-            pdf_path = os.path.join(data_dir, file_name)
-            text_by_page = extract_text_from_pdf(pdf_path)
-            for page_num, text in text_by_page:
-                chunks = split_text_into_chunks(text)
-                # print(f"  Chunks: {chunks}")
-                for chunk_index, chunk in enumerate(chunks):
-                    # embedding = calculate_embedding(chunk)
-                    embedding = get_embedding(chunk)
-                    store_embedding(
-                        file=file_name,
-                        page=str(page_num),
-                        # chunk=str(chunk_index),
-                        chunk=str(chunk),
-                        embedding=embedding,
-                    )
-                    
-            print(f" -----> Processed {file_name}")
-
 def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
 
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".pdf"):
             pdf_path = os.path.join(data_dir, file_name)
 
-            # pass pdf reader here, as well as flag to preprocess or not
             text_by_page = extract_text_from_pdf(pdf_path)
 
             for page_num, text in text_by_page:
@@ -161,9 +132,7 @@ def process_pdfs_alt(data_dir, chunk_size, overlap, embed, preprocess, db):
                     text = preprocess_text(text)  
 
                 chunks = split_text_into_chunks(text, chunk_size, overlap)
-                # print(f"  Chunks: {chunks}")
                 for chunk_index, chunk in enumerate(chunks):
-                    # embedding = calculate_embedding(chunk)
                     embedding = get_embedding(chunk, embed)
                     store_embedding(
                         file=file_name,
@@ -207,13 +176,6 @@ def test_preproc_vars(chunk_size, overlap, embed, preprocess=0, db='redis'):
 
 def main():
     test_preproc_vars(500, 100, "nomic-embed-text")
-# def main():
-#     clear_redis_store()
-#     create_hnsw_index()
-
-#     process_pdfs("../data/")
-#     print("\n---Done processing PDFs---\n")
-#     query_redis("What is the capital of France?")
 
 
 if __name__ == "__main__":
