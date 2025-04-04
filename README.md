@@ -38,7 +38,7 @@ Note: you can spin up multiple containers at once by adding more ```--profile db
 Place any .pdf files that you wish to be ingested and used for the RAG into the /data folder
 
 ### 4. Ingest the data
-Depending on which database type you are using, you will need to run different commands: 
+Depending on which database type you are using, you will need to run different commands:  
 For Redis:   
 ```bash
 python ingest.py
