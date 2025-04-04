@@ -53,7 +53,7 @@ python rag_weaviate_ingest.py
 ```  
 
 ### 5. Start up Model
-Again depending on the database type used, you will need to run one of the following different commands:
+Again depending on the database type used, you will need to run one of the following different commands:  
 For Redis:   
 ```bash
 python search.py
