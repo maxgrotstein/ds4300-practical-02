@@ -85,15 +85,20 @@ You will also need Docker installed and running in order to create the container
 ## Experimental Methodology
 
 ### Model Refinement Process
-1. Test the PDF module first to check efficacy
-2. Check the chunk size, overlay, and embedding model
-3. Try tweaking K nearest neighbors in search
+We conducted a structured 3-stage evaluation to refine the RAG pipeline. Each experiment isolated a specific component, with earlier choices held constant in later stages to reason about trade-offs effectively.
 
-### Data Collection (METHODOLOGY, why we broke these variables into these sets)
-1. Record for response quality chunk-size, chunk overlap, pre-processing (whitespace), embedding model, llm, prompt memory
-2. Experiment Set #1: check chunk-size, chunk overlap, pre-proc, pdf for response quality
-3. Experiment Set #2: embedding model, llm, prompt memory for response quality
-4. Experiment Set #3: track db size, construction time, search time (need to track db type and llm)
+1. **Experiment 1 – Chunking & Preprocessing**  
+   Tested combinations of chunk size (200, 500, 1000), overlap (0, 50, 100), and preprocessing (on/off) to determine how well each configuration preserved context. Used 2 representative questions for qualitative evaluation.
+
+2. **Experiment 2 – Embedding + LLM Pairings**  
+   With chunking fixed, we compared embedding models (`nomic-embed-text`, `mxbai-embed-large`, `bge-m3`) and LLMs (`llama3:2`, `mistral`) using the full 6-question set. Evaluated response quality and performance metrics like search time and memory.
+
+3. **Experiment 3 – Vector Database Comparison**  
+   Finalized chunking and models were used to test vector DBs (`Redis`, `Chroma`, `Weaviate`) for indexing speed, search latency, and memory usage.
+
+### Data Collection Strategy
+- **Qualitative**: Assessed response clarity, completeness, and relevance.  
+- **Quantitative**: Collected search/generation time, memory usage, vector similarity, and index build/search performance.
 
 ## Credits
 Built by Max Grotstein & Ben Pierce for experimenting with real-world RAG configurations and vector DB performance.
