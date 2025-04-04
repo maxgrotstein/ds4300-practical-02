@@ -5,8 +5,9 @@ import psutil
 from ingest_exp2 import clear_redis_store, create_hnsw_index, process_pdfs_alt
 from search_exp2 import search_embeddings, generate_rag_response
 
-# results folder
-os.makedirs("results", exist_ok=True)
+# Sets path to results folder
+results_dir = os.path.join(os.path.dirname(__file__), '..', 'results')
+os.makedirs(results_dir, exist_ok=True)
 
 # constants
 CHUNK_SIZE = 1000
@@ -28,7 +29,7 @@ questions = [
     "2) What are the inherent CAP theorem tradeoffs associated with different types of database systems, such as relational databases (RDBMS), document stores (e.g., MongoDB), vector databases (e.g., Redis with vector support), and graph databases (e.g., Neo4j)?"
 ]
 
-output_csv = os.path.join("results", "experiment2_results.csv")
+output_csv = os.path.join(results_dir, 'experiment2_results.csv')
 
 with open(output_csv, mode="w", newline="", encoding="utf-8") as csvfile:
     fieldnames = [

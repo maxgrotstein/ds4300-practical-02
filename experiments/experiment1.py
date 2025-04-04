@@ -10,8 +10,9 @@ from ingest_exp1 import clear_redis_store, create_hnsw_index, process_pdfs_alt
 from search_exp1 import search_embeddings, generate_rag_response
 import os
 
-# results folder
-os.makedirs("results", exist_ok=True)
+# Sets path to results folder
+results_dir = os.path.join(os.path.dirname(__file__), '..', 'results')
+os.makedirs(results_dir, exist_ok=True)
 
 # constants 
 EMBEDDING_MODEL = "nomic-embed-text"
@@ -29,7 +30,7 @@ questions = [
     "document stores (e.g., MongoDB), vector databases (e.g., Redis with vector support), and graph databases (e.g., Neo4j)?"
 ]
 
-output_csv = os.path.join("results", "experiment1_results.csv")
+output_csv = os.path.join(results_dir, 'experiment1_results.csv')
 
 with open(output_csv, mode="w", newline="", encoding="utf-8") as csvfile:
     fieldnames = [

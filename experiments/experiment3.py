@@ -5,8 +5,9 @@ import time
 import os
 import psutil
 
-# create results folder if it doesn't exist
-os.makedirs("results", exist_ok=True)
+# Sets path to results folder
+results_dir = os.path.join(os.path.dirname(__file__), '..', 'results')
+os.makedirs(results_dir, exist_ok=True)
 
 # constants
 CHUNK_SIZE = 1000
@@ -16,7 +17,6 @@ EMBEDDING_MODEL = "nomic-embed-text"
 OLLAMA_MODEL = "llama3.2:latest"
 DB = os.getenv("EXPERIMENT_DB", "redis").lower()  # set manually before each run
 DATA_DIR = "../data/"
-OUTPUT_CSV = "results/experiment3_results.csv"
 
 # questions
 questions = [
@@ -41,10 +41,11 @@ elif DB == "weaviate":
 else:
     raise ValueError("Invalid DB selection. Must be 'redis', 'chroma', or 'weaviate'.")
 
+output_csv = os.path.join(results_dir, 'experiment3_results.csv')
 
 
 # run the experiment
-with open(OUTPUT_CSV, mode="a", newline="", encoding="utf-8") as csvfile:
+with open(output_csv, mode="a", newline="", encoding="utf-8") as csvfile:
     fieldnames = [
         "question", "response", "db",
         "index_time", "index_memory", 
@@ -53,7 +54,7 @@ with open(OUTPUT_CSV, mode="a", newline="", encoding="utf-8") as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='~', quoting=csv.QUOTE_MINIMAL)
 
     # write header only if file is empty
-    if os.stat(OUTPUT_CSV).st_size == 0:
+    if os.stat(output_csv).st_size == 0:
         writer.writeheader()
 
     print(f"\n--- Running Experiment 3 for DB: {DB} ---")
@@ -98,4 +99,4 @@ with open(OUTPUT_CSV, mode="a", newline="", encoding="utf-8") as csvfile:
         })
         print("Response recorded.")
 
-print(f"\nExperiment completed. Results saved to {OUTPUT_CSV}")
+print(f"\nExperiment completed. Results saved to {output_csv}")
